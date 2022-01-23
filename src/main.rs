@@ -13,11 +13,12 @@ fn main() -> std::io::Result<()> {
             file.write_all(&GIF_SIGNATURE)?;
         }
 
+        let logical_screen_descriptor_width = 0x10;
+        let logical_screen_descriptor_height = 0x10;
+
         // descriptor
         {
-            let logical_screen_descriptor_width = 10;
-            let logical_screen_descriptor_height = 10;
-            let global_color_table_flag = 0b11110111;
+            let packed_fields = 0b11110111;
             let background_color_index = 0x00;
             let pixel_aspect_ratio = 0x00;
             file.write_all(&[
@@ -25,7 +26,7 @@ fn main() -> std::io::Result<()> {
                 0x00,
                 logical_screen_descriptor_height,
                 0x00,
-                global_color_table_flag,
+                packed_fields,
                 background_color_index,
                 pixel_aspect_ratio,
             ])?;
@@ -50,6 +51,26 @@ fn main() -> std::io::Result<()> {
                     global_color_table_bytes[index + 2] = color.blue;
                 });
             file.write_all(&global_color_table_bytes)?;
+        }
+
+        // image descriptor
+        {
+            let image_separator = 0x2C;
+            let image_left_position = 0x00;
+            let image_top_position = 0x00;
+            let packed_fields = 0b00000000;
+            file.write_all(&[
+                image_separator,
+                image_left_position,
+                0x00,
+                image_top_position,
+                0x00,
+                logical_screen_descriptor_width,
+                0x00,
+                logical_screen_descriptor_height,
+                0x00,
+                packed_fields,
+            ])?;
         }
     }
 
